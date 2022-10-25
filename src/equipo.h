@@ -19,8 +19,11 @@ class Equipo {
 		int cant_jugadores, quantum, quantum_restante;
 		vector<thread> jugadores;
 		int cant_jugadores_que_ya_jugaron = 0;
+		/**/
 		//vector<coordenadas> posiciones; (la hacemos global)
 		//coordenadas pos_bandera_contraria; (la hacemos global y atomica)
+		/**/
+		
 		//
 		// ...
 		//

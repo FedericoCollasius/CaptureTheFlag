@@ -57,7 +57,7 @@ gameMaster::gameMaster(Config config) {
     this->pos_jugadores_azules = config.pos_azul;
 	// Seteo tablero
 	tablero.resize(x);
-    for (int i = 0; i < x; +quantum+i) {
+    for (int i = 0; i < x; ++i) {
         tablero[i].resize(y);
         fill(tablero[i].begin(), tablero[i].end(), VACIO);
     }
@@ -78,9 +78,10 @@ gameMaster::gameMaster(Config config) {
 	this->turno = ROJO;
 
     cout << "SE HA INICIALIZADO GAMEMASTER CON EXITO" << endl;
-	
     // Insertar código que crea necesario de inicialización
-/**/// acomodart semafores turno rojo turno azul
+	/**/
+	// Acomodar semafores turno rojo turno azul.
+	/**/
 }
 
 void gameMaster::mover_jugador_tablero(coordenadas pos_anterior, coordenadas pos_nueva, color colorEquipo){
@@ -92,56 +93,66 @@ void gameMaster::mover_jugador_tablero(coordenadas pos_anterior, coordenadas pos
 
 int gameMaster::mover_jugador(direccion dir, int nro_jugador) {
 
-/**/ //Falta ver si el jugador que se esta moviendo es del equipo que se tenga que mover??????????????????????????????????????????????????????????????
-
 	// Chequear que la movida sea valida
-/**/vector<coordenadas>* posiciones_equipo_actual = &(turno == ROJO ? pos_jugadores_rojos : pos_jugadores_azules);
-/**/coordenadas posicion_vieja = (*posiciones_equipo_actual)[nro_jugador];
-/**/coordenadas posicion_nueva = proxima_posicion(posicion_vieja, dir);
+	/**/
+	vector<coordenadas>* posiciones_equipo_actual = &(turno == ROJO ? pos_jugadores_rojos : pos_jugadores_azules);
+	coordenadas posicion_vieja = (*posiciones_equipo_actual)[nro_jugador];
+	coordenadas posicion_nueva = proxima_posicion(posicion_vieja, dir);
+	/**/
 
 	// Que no se puedan mover 2 jugadores a la vez
-/**/permiso_para_jugar.lock();
-/**/assert(es_posicion_valida(posicion_nueva));
-/**/mover_jugador_tablero(posicion_vieja, posicion_nueva, turno);
-/**/jugadores_movidos++;
-/**/permiso_para_jugar.unlock();
+	/**/
+	permiso_para_jugar.lock();
+	assert(es_posicion_valida(posicion_nueva));
+	mover_jugador_tablero(posicion_vieja, posicion_nueva, turno);
+	jugadores_movidos++;
+	permiso_para_jugar.unlock();
+	/**/
 
-    // setear la variable ganador
-/**/coordenadas bandera_contraria = (turno == ROJO ? pos_bandera_azul : pos_bandera_roja);
-/**/if (posicion_nueva == bandera_contraria) { ganador = turno; }  // Asumimos que tiene que sentarse sobre la bandera, no acercarse
+    // Setear la variable ganador
+	/**/
+	coordenadas bandera_contraria = (turno == ROJO ? pos_bandera_azul : pos_bandera_roja);
+	if (posicion_nueva == bandera_contraria) { ganador = turno; }  // Asumimos que tiene que sentarse sobre la bandera, no acercarse
+	/**/
 
     // Devolver acorde a la descripción
-/**/return (termino_juego() ? 0 : nro_ronda);
+	/**/
+	return (termino_juego() ? 0 : nro_ronda);
+	/**/
 }
 
 
 void gameMaster::termino_ronda(color equipo) {
 	// FIXME: Hacer chequeo de que es el color correcto que está llamando
-/**/assert(turno == equipo);
-	// FIXME: Hacer chequeo que hayan terminado todos los jugadores del equipo o su quantum (via mover_jugador)
-/**/switch(strat) {
-		//SECUENCIAL,RR,SHORTEST,USTEDES
-		case(SECUENCIAL):
-/**/		assert(jugadores_movidos == jugadores_por_equipos);
-			break;
-		case(RR):
-/**/		// assert(jugadores_movidos == quantum);
-/**/		// Lo asevera el jugador antes de terminar
-			break;
-		case(SHORTEST):
-/**/		assert(jugadores_movidos == 1);
-			break;
-		case(USTEDES):
-/**/		assert(jugadores_movidos == 1);
-			break;
-		default:
-/**/		assert(false);
-	}
+	/**/
+	assert(turno == equipo);
+	/**/
 
+	// FIXME: Hacer chequeo que hayan terminado todos los jugadores del equipo o su quantum (via mover_jugador)
+	/**/
+	switch(strat) {
+			case(SECUENCIAL):
+				assert(jugadores_movidos == jugadores_por_equipos);
+				break;
+			case(RR):
+				// assert(jugadores_movidos == quantum);
+				// Lo asevera el jugador antes de terminar
+				break;
+			case(SHORTEST):
+				assert(jugadores_movidos == 1);
+				break;
+			case(USTEDES):
+				assert(jugadores_movidos == 1);
+				break;
+			default:
+				assert(false);
+		}
+	/**/
 	// Cambiar el turno
 	turno = (color)(ROJO+AZUL-turno);
-/**/(turno == ROJO ? turno_rojo : turno_azul).unlock();
+	(turno == ROJO ? turno_rojo : turno_azul).unlock();
 	jugadores_movidos=0;
+	/**/
 }
 
 bool gameMaster::termino_juego() {
@@ -166,10 +177,6 @@ coordenadas gameMaster::proxima_posicion(coordenadas anterior, direccion movimie
 		case(DERECHA):
 			anterior.first++;
 			break;
-	}//
-	// ...
-	//
-}
+	}
 	return anterior; // está haciendo una copia por constructor
 }
-

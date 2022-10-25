@@ -21,11 +21,10 @@ private:
     color turno;
     estrategia strat;
 	
-    //
-    //...
-/**/uint jugadores_movidos = 0;
-/**/mutex permiso_para_jugar;
-    //
+    /**/
+    uint jugadores_movidos = 0;
+    mutex permiso_para_jugar;
+    /**/
 
     // Métodos privados
     color obtener_coordenadas(coordenadas coord);
