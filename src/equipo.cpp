@@ -18,11 +18,7 @@ direccion Equipo::apuntar_a(coordenadas pos1, coordenadas pos2) {
 
 void Equipo::jugador(int nro_jugador) {
 	/**/
-	if (equipo == ROJO) {
-		sem_wait(&bandera_roja_encontrada);
-	} else {
-		sem_wait(&bandera_azul_encontrada);
-	}
+	sem_wait(&bandera_contraria_encontrada);
 	/**/
 
 	while(!this->belcebu->termino_juego()) { // Chequear que no haya una race condition en gameMaster
@@ -38,9 +34,9 @@ void Equipo::jugador(int nro_jugador) {
 				/**/
 				if(nro_jugador==(jugadores_movidos_esta_ronda+1)%cant_jugadores){
 					if(equipo == ROJO){
-						belcebu->mover_jugador(apuntar_a(posActualJugador, pos_bandera_azul), nro_jugador);
+						belcebu->mover_jugador(apuntar_a(posiciones[nro_jugador], pos_bandera_contraria), nro_jugador);
 					} else {
-						belcebu->mover_jugador(apuntar_a(posActualJugador, pos_bandera_roja), nro_jugador);
+						belcebu->mover_jugador(apuntar_a(posiciones[nro_jugador], pos_bandera_contraria), nro_jugador);
 					}
 				}
 				/**/
@@ -68,14 +64,7 @@ void Equipo::jugador(int nro_jugador) {
 	
 }
 /**/
-// Variables globales para simplificar el uso de memoria compartida
-atomic<int> jugadores_movidos_esta_ronda(0);
-atomic<int> nro_jugador_mas_cercano_rojo(0);
-atomic<int> nro_jugador_mas_cercano_azul(0);
-sem_t bandera_roja_encontrada, bandera_azul_encontrada;
-// Sacamos la parte atomica de las banderas porque no es necesario que sea atomica para el problema que planteamos (no hay dos equipos que quieran modificar la misma bandera a la vez) 
-coordenadas pos_bandera_azul, pos_bandera_roja;
-vector<coordenadas> posiciones_azul, posiciones_rojo;
+// Eliminamos variables globales compartidas porque la consigna no lo permite. 
 /**/
 
 Equipo::Equipo(gameMaster *belcebu, color equipo, 
@@ -88,38 +77,35 @@ Equipo::Equipo(gameMaster *belcebu, color equipo,
 	this->quantum = quantum;
 	this->quantum_restante = quantum;
 	this->cant_jugadores = cant_jugadores;
+	this->posiciones = posiciones;
+	
 	/**/
-	//this->posiciones = posiciones;
 	vector<int[2]> los_tubos;
 	for (int i = 0; i < cant_jugadores; i++) {
 		pipe(los_tubos[i]);
 	}
-	if (equipo == ROJO) {
-		sem_init(&bandera_roja_encontrada, 1337/*nonzero*/, cant_jugadores);
-		posiciones_rojo = posiciones;
-	} else {
-		sem_init(&bandera_azul_encontrada, 1337/*nonzero*/, cant_jugadores);
-		posiciones_azul = posiciones;
-	}
+	sem_init(&bandera_contraria_encontrada, 1, cant_jugadores);
+	jugadores_movidos_esta_ronda = 0; 
 	/**/
 }
 
 void Equipo::comenzar() {
 	// Arranco cuando me toque el turno 
 	// TODO: Quien empieza ? 
-	/**/
-	(equipo == ROJO ? belcebu->turno_rojo : belcebu->turno_azul).lock(); // Espero mi turno. 
 	//
 	// ...	
 	//
+	/**/
+	// Deberiamos esperar a que el otro equipo encuentre la bandera contaria para ejecutar threads?
+	buscar_bandera_contraria(); // van a volar signals a rolete
+	/**/
 	// Creamos los jugadores
 	for(int i=0; i < cant_jugadores; i++) {
 		jugadores.emplace_back(thread(&Equipo::jugador, this, i)); 
 		//Cerramos pipes?????????????????????????????
 	}
 
-	buscar_bandera_contraria(); // van a volar signals a rolete
-	terminar();
+
 }
 
 void Equipo::terminar() {
@@ -136,11 +122,7 @@ coordenadas Equipo::buscar_bandera_contraria() {
 	/**/ 
 	// Dejar que empiezen a jugar todos.
 	for (int pp = 0; pp < cant_jugadores; pp++) {
-		if (equipo == ROJO) {
-			sem_post(&bandera_roja_encontrada);
-		} else {
-			sem_post(&bandera_azul_encontrada);
-		}
+		sem_post(&bandera_contraria_encontrada);
 	}
 	/**/
 }

@@ -20,8 +20,12 @@ class Equipo {
 		vector<thread> jugadores;
 		int cant_jugadores_que_ya_jugaron = 0;
 		/**/
-		//vector<coordenadas> posiciones; (la hacemos global)
-		//coordenadas pos_bandera_contraria; (la hacemos global y atomica)
+		vector<coordenadas> posiciones; 
+		coordenadas pos_bandera_contraria; 
+		sem_t bandera_contraria_encontrada;
+		// Quizas jugadores_movidos_esta_ronda tenga que ser atomica por el caso secuencial. 
+		int jugadores_movidos_esta_ronda;
+		atomic<int> nro_jugador_mas_cercano{0};
 		/**/
 		
 		//

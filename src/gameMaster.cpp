@@ -81,6 +81,8 @@ gameMaster::gameMaster(Config config) {
     // Insertar código que crea necesario de inicialización
 	/**/
 	// Acomodar semafores turno rojo turno azul.
+	turno_azul.lock();
+	turno_rojo.unlock();
 	/**/
 }
 
@@ -105,6 +107,7 @@ int gameMaster::mover_jugador(direccion dir, int nro_jugador) {
 	permiso_para_jugar.lock();
 	assert(es_posicion_valida(posicion_nueva));
 	mover_jugador_tablero(posicion_vieja, posicion_nueva, turno);
+	(turno == ROJO ? pos_jugadores_rojos : pos_jugadores_azules)[nro_jugador] = posicion_nueva;
 	jugadores_movidos++;
 	permiso_para_jugar.unlock();
 	/**/
@@ -151,6 +154,7 @@ void gameMaster::termino_ronda(color equipo) {
 	// Cambiar el turno
 	turno = (color)(ROJO+AZUL-turno);
 	(turno == ROJO ? turno_rojo : turno_azul).unlock();
+	(turno == ROJO ? turno_azul : turno_rojo).lock();
 	jugadores_movidos=0;
 	/**/
 }
