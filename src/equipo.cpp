@@ -20,7 +20,7 @@ void Equipo::jugador(int nro_jugador) {
 	/**/
 	sem_wait(&bandera_contraria_encontrada);
 	/**/
-
+	coordenadas posActual = posiciones[nro_jugador];
 	while(!this->belcebu->termino_juego()) { // Chequear que no haya una race condition en gameMaster
 		switch(this->strat) {
 			//SECUENCIAL,RR,SHORTEST,USTEDES
@@ -34,9 +34,9 @@ void Equipo::jugador(int nro_jugador) {
 				/**/
 				if(nro_jugador==(jugadores_movidos_esta_ronda+1)%cant_jugadores){
 					if(equipo == ROJO){
-						belcebu->mover_jugador(apuntar_a(posiciones[nro_jugador], pos_bandera_contraria), nro_jugador);
+						belcebu->mover_jugador(apuntar_a(posActual, pos_bandera_contraria), nro_jugador);
 					} else {
-						belcebu->mover_jugador(apuntar_a(posiciones[nro_jugador], pos_bandera_contraria), nro_jugador);
+						belcebu->mover_jugador(apuntar_a(posActual, pos_bandera_contraria), nro_jugador);
 					}
 				}
 				/**/
