@@ -15,7 +15,6 @@ direccion Equipo::apuntar_a(coordenadas pos1, coordenadas pos2) {
 		return IZQUIERDA;
 }
 
-
 void Equipo::jugador(int nro_jugador) {
 	/**/
 	sem_wait(&bandera_contraria_encontrada);
@@ -33,12 +32,14 @@ void Equipo::jugador(int nro_jugador) {
 			case(RR): // Espera a que le toque nro = movidos. 
 				/**/
 				if(nro_jugador==(jugadores_movidos_esta_ronda+1)%cant_jugadores){
-					if(equipo == ROJO){
-						belcebu->mover_jugador(apuntar_a(posActual, pos_bandera_contraria), nro_jugador);
-					} else {
-						belcebu->mover_jugador(apuntar_a(posActual, pos_bandera_contraria), nro_jugador);
-					}
+					//if(equipo == ROJO){
+					//	belcebu->mover_jugador(apuntar_a(posActual, pos_bandera_contraria), nro_jugador);
+					//} else {
+					//	belcebu->mover_jugador(apuntar_a(posActual, pos_bandera_contraria), nro_jugador);
+					belcebu->mover_jugador(apuntar_a(posActual, pos_bandera_contraria), nro_jugador);
+					jugadores_movidos_esta_ronda++;
 				}
+				//}
 				/**/
 				break;
 
@@ -53,6 +54,7 @@ void Equipo::jugador(int nro_jugador) {
 				//
 				break;
 			default:
+
 				break;
 		}	
 		// Termino ronda ? Recordar llamar a belcebu...
@@ -85,7 +87,7 @@ Equipo::Equipo(gameMaster *belcebu, color equipo,
 		pipe(los_tubos[i]);
 	}
 	sem_init(&bandera_contraria_encontrada, 1, cant_jugadores);
-	jugadores_movidos_esta_ronda = 0; 
+	//jugadores_movidos_esta_ronda = 0; 
 	/**/
 }
 
@@ -99,6 +101,7 @@ void Equipo::comenzar() {
 	// Deberiamos esperar a que el otro equipo encuentre la bandera contaria para ejecutar threads?
 	buscar_bandera_contraria(); // van a volar signals a rolete
 	/**/
+	//wait(1);
 	// Creamos los jugadores
 	for(int i=0; i < cant_jugadores; i++) {
 		jugadores.emplace_back(thread(&Equipo::jugador, this, i)); 
@@ -118,6 +121,11 @@ coordenadas Equipo::buscar_bandera_contraria() {
 	//
 	// ...
 	//
+	if( equipo == ROJO) {
+		pos_bandera_contraria = make_pair(0,0);
+	} else {//seteo valores por simplicidad, no me hinchen
+		pos_bandera_contraria = make_pair(9,9);
+	}
 
 	/**/ 
 	// Dejar que empiezen a jugar todos.

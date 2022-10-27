@@ -10,8 +10,8 @@
 
 using namespace std;
 
-const estrategia strat = SECUENCIAL;
-const int quantum = 10;
+const estrategia strat = RR;
+const int quantum = 2;
 
 int main(){
     Config config = *(new Config());

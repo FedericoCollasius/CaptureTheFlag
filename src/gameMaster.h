@@ -31,6 +31,7 @@ private:
     void mover_jugador_tablero(coordenadas pos_anterior, coordenadas pos_nueva, color colorEquipo);
     //
     //...
+    void dibujame();
     //
  
 public:
@@ -56,6 +57,8 @@ public:
     //
     //...
     //
+    bool banderaRoja(coordenadas cord);
+    bool banderaAzul(coordenadas cord);
 };
 
 #endif // GAMEMASTER_H

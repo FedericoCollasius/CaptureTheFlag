@@ -114,6 +114,7 @@ int gameMaster::mover_jugador(direccion dir, int nro_jugador) {
 
     // Setear la variable ganador
 	/**/
+	dibujame();
 	coordenadas bandera_contraria = (turno == ROJO ? pos_bandera_azul : pos_bandera_roja);
 	if (posicion_nueva == bandera_contraria) { ganador = turno; }  // Asumimos que tiene que sentarse sobre la bandera, no acercarse
 	/**/
@@ -183,4 +184,19 @@ coordenadas gameMaster::proxima_posicion(coordenadas anterior, direccion movimie
 			break;
 	}
 	return anterior; // está haciendo una copia por constructor
+}
+
+bool gameMaster::banderaAzul(coordenadas cord){
+	return (cord == pos_bandera_azul);
+}
+bool gameMaster::banderaRoja(coordenadas cord){
+	return (cord == pos_bandera_roja);
+}
+void gameMaster::dibujame(){
+	for(int i=0; i<x; i++){
+		for(int j=0; j<y; j++){
+			cout << tablero[i][j];
+		}
+		cout << endl;
+	}
 }

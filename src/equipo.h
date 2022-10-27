@@ -4,6 +4,7 @@
 #include <semaphore.h>
 #include <vector>
 #include <thread>
+#include <atomic>
 #include "definiciones.h"
 #include "gameMaster.h"
 
@@ -24,7 +25,7 @@ class Equipo {
 		coordenadas pos_bandera_contraria; 
 		sem_t bandera_contraria_encontrada;
 		// Quizas jugadores_movidos_esta_ronda tenga que ser atomica por el caso secuencial. 
-		int jugadores_movidos_esta_ronda;
+		atomic<int> jugadores_movidos_esta_ronda{0};
 		atomic<int> nro_jugador_mas_cercano{0};
 		/**/
 		

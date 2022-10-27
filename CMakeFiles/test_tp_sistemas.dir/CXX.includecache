@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/mnt/d/Documentos/Cosas facu/SO/cuatri2/tp/tp2/CaptureTheFlag/src/config.h
+iostream
+-
+fstream
+-
+string
+-
+vector
+-
+definiciones.h
+/mnt/d/Documentos/Cosas facu/SO/cuatri2/tp/tp2/CaptureTheFlag/src/definiciones.h
+
+/mnt/d/Documentos/Cosas facu/SO/cuatri2/tp/tp2/CaptureTheFlag/src/definiciones.h
+
+/mnt/d/Documentos/Cosas facu/SO/cuatri2/tp/tp2/CaptureTheFlag/src/gameMaster.cpp
+sys/unistd.h
+-
+assert.h
+-
+gameMaster.h
+/mnt/d/Documentos/Cosas facu/SO/cuatri2/tp/tp2/CaptureTheFlag/src/gameMaster.h
+
+/mnt/d/Documentos/Cosas facu/SO/cuatri2/tp/tp2/CaptureTheFlag/src/gameMaster.h
+tuple
+-
+cstdio
+-
+vector
+-
+mutex
+-
+semaphore.h
+-
+definiciones.h
+/mnt/d/Documentos/Cosas facu/SO/cuatri2/tp/tp2/CaptureTheFlag/src/definiciones.h
+config.h
+/mnt/d/Documentos/Cosas facu/SO/cuatri2/tp/tp2/CaptureTheFlag/src/config.h
+
