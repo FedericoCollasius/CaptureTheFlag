@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <atomic>
 #include <semaphore.h>
+#include <assert.h> 
 /**/
 
 
@@ -15,47 +16,73 @@ direccion Equipo::apuntar_a(coordenadas pos1, coordenadas pos2) {
 		return IZQUIERDA;
 }
 
-void Equipo::jugador(int nro_jugador) {
+
+/*
+*/
+
+void Equipo::jugador(int nro_jugador, datos_conjuntos_de_equipo & datos_equipo) {
 	/**/
-	sem_wait(&bandera_contraria_encontrada);
+	datos_equipo.bandera_contraria_encontrada.lock();
 	/**/
-	coordenadas posActual = posiciones[nro_jugador];
+	coordenadas pos_actual = posiciones[nro_jugador];
+	
 	while(!this->belcebu->termino_juego()) { // Chequear que no haya una race condition en gameMaster
 		switch(this->strat) {
 			//SECUENCIAL,RR,SHORTEST,USTEDES
 			case(SECUENCIAL): // No espera a nadie. 
-				// 
-				// 
-				//
-				break;
+				{
+					datos_equipo.tablero.lock();
+					direccion direc_nueva = apuntar_a(pos_actual, pos_bandera_contraria);
+					direccion direc_deseada = direc_nueva;
+					
+					// Elijo la proxima direccion en caso de no poder moverme.
+					while(!belcebu->sePuedeMover(pos_actual, direc_nueva) && direc_nueva != direc_deseada){
+						if(direc_deseada == ARRIBA || IZQUIERDA){
+							direc_nueva = (direccion) ((direc_deseada - 1) % 4);
+						} else {
+							direc_nueva = (direccion) ((direc_deseada + 1) % 4);
+						}
+					}
+				
+					if (belcebu->sePuedeMover(pos_actual, direc_nueva));
+					belcebu->mover_jugador(direc_nueva, nro_jugador);
+					jugadores_movidos_esta_ronda++;
+					datos_equipo.tablero.unlock();
+					break;
+				}
 			
 			case(RR): // Espera a que le toque nro = movidos. 
-				/**/
+				{/**/
+				/*
 				if(nro_jugador==(jugadores_movidos_esta_ronda+1)%cant_jugadores){
 					//if(equipo == ROJO){
 					//	belcebu->mover_jugador(apuntar_a(posActual, pos_bandera_contraria), nro_jugador);
 					//} else {
 					//	belcebu->mover_jugador(apuntar_a(posActual, pos_bandera_contraria), nro_jugador);
-					belcebu->mover_jugador(apuntar_a(posActual, pos_bandera_contraria), nro_jugador);
+					belcebu->mover_jugador(apuntar_a(pos_actual, pos_bandera_contraria), nro_jugador);
 					jugadores_movidos_esta_ronda++;
 				}
+				*/
 				//}
 				/**/
-				break;
+					break;
+				}
 
-			case(SHORTEST): 
-				//
-				//	...
-				//
-				break;
+			case(SHORTEST):
+				{ 
+					belcebu->mover_jugador(apuntar_a(pos_actual, pos_bandera_contraria),nro_jugador_mas_cercano);
+					break;
+				}
 			case(USTEDES):
-				//
+				{//
 				// ...
 				//
-				break;
+					break;
+				}
 			default:
-
-				break;
+				{
+					break;
+				}
 		}	
 		// Termino ronda ? Recordar llamar a belcebu...
 		// OJO. Esto lo termina un jugador... 
@@ -86,7 +113,6 @@ Equipo::Equipo(gameMaster *belcebu, color equipo,
 	for (int i = 0; i < cant_jugadores; i++) {
 		pipe(los_tubos[i]);
 	}
-	sem_init(&bandera_contraria_encontrada, 1, cant_jugadores);
 	//jugadores_movidos_esta_ronda = 0; 
 	/**/
 }
@@ -97,16 +123,18 @@ void Equipo::comenzar() {
 	//
 	// ...	
 	//
-	/**/
-	// Deberiamos esperar a que el otro equipo encuentre la bandera contaria para ejecutar threads?
-	buscar_bandera_contraria(); // van a volar signals a rolete
-	/**/
-	//wait(1);
+	
+	datos_equipo.bandera_contraria_encontrada.unlock();
+	datos_equipo.tablero.unlock();
+
+
 	// Creamos los jugadores
 	for(int i=0; i < cant_jugadores; i++) {
-		jugadores.emplace_back(thread(&Equipo::jugador, this, i)); 
+		jugadores.emplace_back(thread(&Equipo::jugador, this, i, ref(datos_equipo))); 
 		//Cerramos pipes?????????????????????????????
 	}
+
+	buscar_bandera_contraria(); // van a volar signals a rolete
 
 
 }
@@ -130,7 +158,7 @@ coordenadas Equipo::buscar_bandera_contraria() {
 	/**/ 
 	// Dejar que empiezen a jugar todos.
 	for (int pp = 0; pp < cant_jugadores; pp++) {
-		sem_post(&bandera_contraria_encontrada);
+		datos_equipo.bandera_contraria_encontrada.unlock();
 	}
 	/**/
 }

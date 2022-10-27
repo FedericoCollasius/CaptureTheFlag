@@ -59,6 +59,7 @@ public:
     //
     bool banderaRoja(coordenadas cord);
     bool banderaAzul(coordenadas cord);
+    bool sePuedeMover(coordenadas pos_nueva, direccion direc_nueva);
 };
 
 #endif // GAMEMASTER_H

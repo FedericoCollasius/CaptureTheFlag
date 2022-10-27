@@ -22,7 +22,7 @@ int gameMaster::getTamy() {
 	return y;
 }
 
-int gameMaster::distancia(coordenadas c1, coordenadas c2) {
+int gameMaster::distancia(coordenadas c1, coordenadas c2) { 
     return abs(c1.first-c2.first)+abs(c1.second-c2.second);
 }
 
@@ -81,7 +81,7 @@ gameMaster::gameMaster(Config config) {
     // Insertar código que crea necesario de inicialización
 	/**/
 	// Acomodar semafores turno rojo turno azul.
-	turno_azul.lock();
+	//turno_azul.lock();
 	turno_rojo.unlock();
 	/**/
 }
@@ -154,8 +154,8 @@ void gameMaster::termino_ronda(color equipo) {
 	/**/
 	// Cambiar el turno
 	turno = (color)(ROJO+AZUL-turno);
-	(turno == ROJO ? turno_rojo : turno_azul).unlock();
-	(turno == ROJO ? turno_azul : turno_rojo).lock();
+	(turno == ROJO ? turno_rojo : turno_azul).unlock(); // libera al que le toque
+	//(turno == ROJO ? turno_azul : turno_rojo).lock();  ¿ta mal esto acá?
 	jugadores_movidos=0;
 	/**/
 }
@@ -200,3 +200,9 @@ void gameMaster::dibujame(){
 		cout << endl;
 	}
 }
+
+bool gameMaster::sePuedeMover(coordenadas pos_actual, direccion direc_nueva){
+	 coordenadas pos_nueva = proxima_posicion(pos_actual, direc_nueva);
+	 return es_posicion_valida(pos_nueva) && es_color_libre(tablero[pos_nueva.first][pos_nueva.second]);
+}
+

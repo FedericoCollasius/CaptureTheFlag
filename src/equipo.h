@@ -19,24 +19,29 @@ class Equipo {
 		estrategia strat;
 		int cant_jugadores, quantum, quantum_restante;
 		vector<thread> jugadores;
+
 		int cant_jugadores_que_ya_jugaron = 0;
 		/**/
 		vector<coordenadas> posiciones; 
 		coordenadas pos_bandera_contraria; 
-		sem_t bandera_contraria_encontrada;
+		// sem_t bandera_contraria_encontrada;
 		// Quizas jugadores_movidos_esta_ronda tenga que ser atomica por el caso secuencial. 
 		atomic<int> jugadores_movidos_esta_ronda{0};
 		atomic<int> nro_jugador_mas_cercano{0};
 		/**/
 		
-		//
-		// ...
-		//
+		struct datos_conjuntos_de_equipo
+		{
+			mutex bandera_contraria_encontrada;
+			mutex tablero; 
+		} datos_equipo;
 
 		// Métodos privados 
 		direccion apuntar_a(coordenadas pos2, coordenadas pos1);
-		void jugador(int nro_jugador);
+		void jugador(int nro_jugador, datos_conjuntos_de_equipo & datitos);
 		coordenadas buscar_bandera_contraria();
+
+		
 		//
 		// ...
 		//
@@ -48,4 +53,7 @@ class Equipo {
 		// crear jugadores
 
 };
+
+
+
 #endif // EQUIPO_H

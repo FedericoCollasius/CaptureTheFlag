@@ -10,7 +10,7 @@
 
 using namespace std;
 
-const estrategia strat = RR;
+const estrategia strat = SECUENCIAL;
 const int quantum = 2;
 
 int main(){
