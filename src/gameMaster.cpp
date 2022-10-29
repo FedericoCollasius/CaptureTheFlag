@@ -104,12 +104,12 @@ int gameMaster::mover_jugador(direccion dir, int nro_jugador) {
 
 	// Que no se puedan mover 2 jugadores a la vez
 	/**/
-	permiso_para_jugar.lock();
+	// permiso_para_jugar.lock();
 	assert(es_posicion_valida(posicion_nueva));
 	mover_jugador_tablero(posicion_vieja, posicion_nueva, turno);
 	(turno == ROJO ? pos_jugadores_rojos : pos_jugadores_azules)[nro_jugador] = posicion_nueva;
 	jugadores_movidos++;
-	permiso_para_jugar.unlock();
+	// permiso_para_jugar.unlock();
 	/**/
 
     // Setear la variable ganador
@@ -141,6 +141,7 @@ void gameMaster::termino_ronda(color equipo) {
 			case(RR):
 				// assert(jugadores_movidos == quantum);
 				// Lo asevera el jugador antes de terminar
+				// Resetear semaforos y Q. 
 				break;
 			case(SHORTEST):
 				assert(jugadores_movidos == 1);

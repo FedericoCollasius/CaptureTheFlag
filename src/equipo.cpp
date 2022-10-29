@@ -16,13 +16,27 @@ direccion Equipo::apuntar_a(coordenadas pos1, coordenadas pos2) {
 		return IZQUIERDA;
 }
 
+direccion Equipo::direccion_proxima_posicion(coordenada posActual, direccion direc_deseada) {
+	direccion direc_nueva = direc_deseada;
+	// Elijo la proxima direccion en caso de no poder moverme.
+	while(!belcebu->sePuedeMover(pos_actual, direc_nueva) && direc_nueva != direc_deseada){
+		if(direc_deseada == ARRIBA || IZQUIERDA){
+			direc_nueva = (direccion) ((direc_deseada - 1) % 4);
+		} else {
+			direc_nueva = (direccion) ((direc_deseada + 1) % 4);
+		}
+	}
+
+	return direc_nueva;
+}
+
 
 /*
 */
 
-void Equipo::jugador(int nro_jugador, datos_conjuntos_de_equipo & datos_equipo) {
+void Equipo::jugador(int nro_jugador) {
 	/**/
-	datos_equipo.bandera_contraria_encontrada.lock();
+	this->bandera_contraria_encontrada.lock();
 	/**/
 	coordenadas pos_actual = posiciones[nro_jugador];
 	
@@ -31,47 +45,55 @@ void Equipo::jugador(int nro_jugador, datos_conjuntos_de_equipo & datos_equipo) 
 			//SECUENCIAL,RR,SHORTEST,USTEDES
 			case(SECUENCIAL): // No espera a nadie. 
 				{
-					datos_equipo.tablero.lock();
-					direccion direc_nueva = apuntar_a(pos_actual, pos_bandera_contraria);
-					direccion direc_deseada = direc_nueva;
-					
-					// Elijo la proxima direccion en caso de no poder moverme.
-					while(!belcebu->sePuedeMover(pos_actual, direc_nueva) && direc_nueva != direc_deseada){
-						if(direc_deseada == ARRIBA || IZQUIERDA){
-							direc_nueva = (direccion) ((direc_deseada - 1) % 4);
-						} else {
-							direc_nueva = (direccion) ((direc_deseada + 1) % 4);
-						}
-					}
+					this->tablero.lock();
+					direccion direc_deseada = apuntar_a(pos_actual, pos_bandera_contraria);
+					direccion direc_nueva = direccion_proxima_posicion(pos_actual, direc_deseada);
 				
-					if (belcebu->sePuedeMover(pos_actual, direc_nueva));
-					belcebu->mover_jugador(direc_nueva, nro_jugador);
-					jugadores_movidos_esta_ronda++;
-					datos_equipo.tablero.unlock();
+					if (belcebu->sePuedeMover(pos_actual, direc_nueva)){
+						belcebu->mover_jugador(direc_nueva, nro_jugador);
+						this->posiciones[nro_jugador] = belcebu->proxima_posicion(pos_actual, direc_nueva);
+					}
+
+					this->se_movio_jugador[nro_jugador] = true;
+					jugadores_movidos_esta_ronda.get_and_inc();
+					this->tablero.unlock();
 					break;
 				}
 			
 			case(RR): // Espera a que le toque nro = movidos. 
-				{/**/
-				/*
-				if(nro_jugador==(jugadores_movidos_esta_ronda+1)%cant_jugadores){
-					//if(equipo == ROJO){
-					//	belcebu->mover_jugador(apuntar_a(posActual, pos_bandera_contraria), nro_jugador);
-					//} else {
-					//	belcebu->mover_jugador(apuntar_a(posActual, pos_bandera_contraria), nro_jugador);
-					belcebu->mover_jugador(apuntar_a(pos_actual, pos_bandera_contraria), nro_jugador);
-					jugadores_movidos_esta_ronda++;
+				{
+				this->orden_jugadores_rr[nro_jugador].lock();
+				if (this->quantum_restante > 0){
+					this->tablero.lock();
+					direccion direc_deseada = apuntar_a(pos_actual, pos_bandera_contraria);
+					direccion direc_nueva = direccion_proxima_posicion(pos_actual, direc_deseada);
+				
+					if (belcebu->sePuedeMover(pos_actual, direc_nueva)){
+						belcebu->mover_jugador(direc_nueva, nro_jugador);
+						this->posiciones[nro_jugador] = belcebu->proxima_posicion(pos_actual, direc_nueva);
+					}
+					this->quantum_restante--;
+					this->tablero.unlock();	
+				} else {
+					// Termino la ronda. 
 				}
-				*/
-				//}
-				/**/
-					break;
+				this->orden_jugadores_rr[(nro_jugador+1)%cant_jugadores].unlock();
+				break;
 				}
-
+				
 			case(SHORTEST):
 				{ 
-					belcebu->mover_jugador(apuntar_a(pos_actual, pos_bandera_contraria),nro_jugador_mas_cercano);
-					break;
+					this->tablero.lock();
+					if(nro_jugador == nro_jugador_mas_cercano){
+						direccion direc_deseada = apuntar_a(pos_actual, pos_bandera_contraria);
+						direccion direc_nueva = direccion_proxima_posicion(pos_actual, direc_deseada);
+					
+						if (belcebu->sePuedeMover(pos_actual, direc_nueva)){
+							belcebu->mover_jugador(direc_nueva, nro_jugador);
+							this->posiciones[nro_jugador] = belcebu->proxima_posicion(pos_actual, direc_nueva);
+						}
+					}
+					this->tablero.unlock();
 				}
 			case(USTEDES):
 				{//
@@ -108,13 +130,13 @@ Equipo::Equipo(gameMaster *belcebu, color equipo,
 	this->cant_jugadores = cant_jugadores;
 	this->posiciones = posiciones;
 	
-	/**/
-	vector<int[2]> los_tubos;
-	for (int i = 0; i < cant_jugadores; i++) {
-		pipe(los_tubos[i]);
-	}
-	//jugadores_movidos_esta_ronda = 0; 
-	/**/
+	this->orden_jugadores_rr(cant_jugadores, mutex(0));
+	this->orden_jugadores_rr[0].unlock(); 
+
+	this->se_movio_jugador(cant_jugadores, false);
+
+	this->nro_jugador_mas_cercano = -1;
+
 }
 
 void Equipo::comenzar() {
@@ -124,18 +146,19 @@ void Equipo::comenzar() {
 	// ...	
 	//
 	
-	datos_equipo.bandera_contraria_encontrada.unlock();
-	datos_equipo.tablero.unlock();
+	this->bandera_contraria_encontrada.unlock();
+	this->tablero.unlock();
 
 
 	// Creamos los jugadores
 	for(int i=0; i < cant_jugadores; i++) {
-		jugadores.emplace_back(thread(&Equipo::jugador, this, i, ref(datos_equipo))); 
-		//Cerramos pipes?????????????????????????????
+		jugadores.emplace_back(thread(&Equipo::jugador, this, i)); 
 	}
 
 	buscar_bandera_contraria(); // van a volar signals a rolete
-
+	if(this->strat == SHORTEST) {
+		this->nro_jugador_mas_cercano = jugador_mas_cercano();
+	}
 
 }
 
@@ -161,4 +184,17 @@ coordenadas Equipo::buscar_bandera_contraria() {
 		datos_equipo.bandera_contraria_encontrada.unlock();
 	}
 	/**/
+}
+
+int Equipo::jugador_mas_cercano() {
+	int distancia_mas_cercana = belcebu->getTamx() + belcebu->getTamy();
+	int nro_jugador_mas_cercano = -1;
+	for(auto &t:this->posiciones) {
+		int distancia_jugador_bandera = belcebu->distancia(t, this->pos_bandera_contraria);
+		if(distancia_jugador_bandera < distancia_mas_cercana) {
+			distancia_mas_cercana = distancia_jugador_bandera;
+			nro_jugador_mas_cercano = t.first; // Checkear que atributo de jugador es su id. 
+		}
+	}
+	return nro_jugador_mas_cercano;
 }
