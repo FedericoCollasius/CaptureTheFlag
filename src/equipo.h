@@ -26,20 +26,22 @@ class Equipo {
 		coordenadas pos_bandera_contraria; 
 		// sem_t bandera_contraria_encontrada;
 		// Quizas jugadores_movidos_esta_ronda tenga que ser atomica por el caso secuencial. 
-		atomic<int> jugadores_movidos_esta_ronda{0};
+		int jugadores_movidos_esta_ronda{0};
 		int nro_jugador_mas_cercano;
 		/**/
 		
-		vector<mutex> orden_jugadores_rr;
+		vector<sem_t> orden_jugadores_rr;
 		vector<bool> se_movio_jugador;
 
 		// Métodos privados 
 		direccion apuntar_a(coordenadas pos2, coordenadas pos1);
-		void jugador(int nro_jugador, datos_conjuntos_de_equipo & datitos);
+		void jugador(int nro_jugador);
 		coordenadas buscar_bandera_contraria();
-		direccion direccion_proxima_posicion(coordenada posActual, direccion direc_deseada);
+		direccion direccion_proxima_posicion(coordenadas posActual, direccion direc_deseada);
 		mutex tablero; 
 		mutex bandera_contraria_encontrada;
+
+		int jugador_mas_cercano();
 		//
 		// ...
 		//

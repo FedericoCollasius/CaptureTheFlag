@@ -1,13 +1,22 @@
 #include <sys/unistd.h>
 #include <assert.h>     /* assert */
 #include "gameMaster.h"
+ #include <sys/wait.h>
+
 
 bool gameMaster::es_posicion_valida(coordenadas pos) {
 	return (pos.first > 0) && (pos.first < x) && (pos.second > 0) && (pos.second < y);
 }
 
 bool gameMaster::es_color_libre(color color_tablero){
-    return color_tablero == VACIO || color_tablero == INDEFINIDO;
+	bool bandera;
+	if(turno == ROJO){
+		bandera = (color_tablero == BANDERA_AZUL);
+	}
+	else{
+		bandera = (color_tablero == BANDERA_ROJA);
+	}
+    return color_tablero == VACIO || color_tablero == INDEFINIDO || bandera;
 }
 
 color gameMaster::en_posicion(coordenadas coord) {
@@ -33,10 +42,10 @@ gameMaster::gameMaster(Config config) {
     this->x = config.x;
 	this->y = config.y;
 
-	assert((config.bandera_roja.first == 1)); // Bandera roja en la primera columna
+	//assert((config.bandera_roja.first == 1)); // Bandera roja en la primera columna
 	assert(es_posicion_valida(config.bandera_roja)); // Bandera roja en algún lugar razonable
 
-	assert((config.bandera_azul.first == x-1)); // Bandera azul en la primera columna
+	//assert((config.bandera_azul.first == x-1)); // Bandera azul en la primera columna
 	assert(es_posicion_valida(config.bandera_azul)); // Bandera roja en algún lugar razonable
 
 	assert(config.pos_rojo.size() == config.cantidad_jugadores);
@@ -64,11 +73,13 @@ gameMaster::gameMaster(Config config) {
     
 
     for(auto &coord : config.pos_rojo){
+		cout << "Posicion roja: " << coord.first << " " << coord.second << endl;
         assert(es_color_libre(tablero[coord.first][coord.second])); //Compruebo que no haya otro jugador en esa posicion
         tablero[coord.first][coord.second] = ROJO; // guardo la posicion
     }
 
     for(auto &coord : config.pos_azul){
+		cout << "Posicion azul: " << coord.first << " " << coord.second << endl;
         assert(es_color_libre(tablero[coord.first][coord.second]));
         tablero[coord.first][coord.second] = AZUL;
     }
@@ -76,17 +87,20 @@ gameMaster::gameMaster(Config config) {
     tablero[config.bandera_roja.first][config.bandera_roja.second] = BANDERA_ROJA;
     tablero[config.bandera_azul.first][config.bandera_azul.second] = BANDERA_AZUL;
 	this->turno = ROJO;
-
+	dibujame();
     cout << "SE HA INICIALIZADO GAMEMASTER CON EXITO" << endl;
     // Insertar código que crea necesario de inicialización
 	/**/
 	// Acomodar semafores turno rojo turno azul.
 	//turno_azul.lock();
-	turno_rojo.unlock();
+	sem_init(&turno_azul, 0, 0);
+	sem_init(&turno_rojo, 0, 1);
+	//sem_post(&turno_rojo);
 	/**/
 }
 
 void gameMaster::mover_jugador_tablero(coordenadas pos_anterior, coordenadas pos_nueva, color colorEquipo){
+	//cout<< "assert?? " << tablero[pos_anterior.first][pos_anterior.second] << " " << colorEquipo << endl;
     assert(es_color_libre(tablero[pos_nueva.first][pos_nueva.second]));
     tablero[pos_anterior.first][pos_anterior.second] = VACIO; 
     tablero[pos_nueva.first][pos_nueva.second] = colorEquipo;
@@ -114,7 +128,9 @@ int gameMaster::mover_jugador(direccion dir, int nro_jugador) {
 
     // Setear la variable ganador
 	/**/
+	//cout << "dibujame como a vos te gusta" << endl;
 	dibujame();
+	sleep(1);
 	coordenadas bandera_contraria = (turno == ROJO ? pos_bandera_azul : pos_bandera_roja);
 	if (posicion_nueva == bandera_contraria) { ganador = turno; }  // Asumimos que tiene que sentarse sobre la bandera, no acercarse
 	/**/
@@ -129,6 +145,7 @@ int gameMaster::mover_jugador(direccion dir, int nro_jugador) {
 void gameMaster::termino_ronda(color equipo) {
 	// FIXME: Hacer chequeo de que es el color correcto que está llamando
 	/**/
+	//cout << turno << " " << equipo << endl;
 	assert(turno == equipo);
 	/**/
 
@@ -136,6 +153,7 @@ void gameMaster::termino_ronda(color equipo) {
 	/**/
 	switch(strat) {
 			case(SECUENCIAL):
+				//cout << jugadores_movidos << " ?? " << jugadores_por_equipos << endl;
 				assert(jugadores_movidos == jugadores_por_equipos);
 				break;
 			case(RR):
@@ -154,8 +172,11 @@ void gameMaster::termino_ronda(color equipo) {
 		}
 	/**/
 	// Cambiar el turno
+	nro_ronda++;
+	if(nro_ronda > 100) { ganador = EMPATE; }
 	turno = (color)(ROJO+AZUL-turno);
-	(turno == ROJO ? turno_rojo : turno_azul).unlock(); // libera al que le toque
+	sem_wait(&(turno == AZUL ? turno_rojo : turno_azul));
+	sem_post(&(turno == ROJO ? turno_rojo : turno_azul)); // libera al que le toque
 	//(turno == ROJO ? turno_azul : turno_rojo).lock();  ¿ta mal esto acá?
 	jugadores_movidos=0;
 	/**/
@@ -196,14 +217,34 @@ bool gameMaster::banderaRoja(coordenadas cord){
 void gameMaster::dibujame(){
 	for(int i=0; i<x; i++){
 		for(int j=0; j<y; j++){
-			cout << tablero[i][j];
+			if(tablero[j][i] == 0){
+				cout << "B" << " ";
+			}else if(tablero[j][i] == 1){
+				cout << "R" << " ";
+			}else if(tablero[j][i] == 2){
+				cout << "?" << " ";
+			}else if(tablero[j][i] == 3){
+				cout << "." << " ";
+			}else if(tablero[j][i] == 4){
+				cout << "?" << " ";
+			}else if(tablero[j][i] == 5){
+				cout << "z" << " ";
+			}else if(tablero[j][i] == 6){
+				cout << "x" << " ";
+			}
 		}
 		cout << endl;
 	}
+	for(int i=0; i<x; i++){
+		cout << "--";
+	}
+	cout << endl;
 }
 
 bool gameMaster::sePuedeMover(coordenadas pos_actual, direccion direc_nueva){
 	 coordenadas pos_nueva = proxima_posicion(pos_actual, direc_nueva);
+	 //cout << "posicion: " << pos_nueva.first << " " <<pos_nueva.second <<" posicion valida: " << es_posicion_valida(pos_nueva) << " color libre: " << es_color_libre(tablero[pos_nueva.first][pos_nueva.second]) << endl;
+	 //cout << tablero[pos_nueva.first][pos_nueva.second] << endl;
 	 return es_posicion_valida(pos_nueva) && es_color_libre(tablero[pos_nueva.first][pos_nueva.second]);
 }
 

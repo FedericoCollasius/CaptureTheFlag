@@ -49,7 +49,7 @@ public:
 	int getTamx();
 	int getTamy();
     static int distancia(coordenadas pair1, coordenadas pair2);
-    mutex turno_rojo, turno_azul; // FIXME: Al principio necesito entrar como azul, luego puedo hacerlo por el método termino_ronda....
+    sem_t turno_rojo, turno_azul; // FIXME: Al principio necesito entrar como azul, luego puedo hacerlo por el método termino_ronda....
     color en_posicion(coordenadas coord);
     bool es_posicion_valida(coordenadas pos);
     bool es_color_libre(color color_tablero);
