@@ -20,9 +20,11 @@ direccion Equipo::apuntar_a(coordenadas pos1, coordenadas pos2) {
 
 direccion Equipo::direccion_proxima_posicion(coordenadas posActual, direccion direc_deseada) {
 	direccion direc_nueva = direc_deseada;
+	cout << "me quiero mover a: " << direc_deseada << endl;
 	direccion opuesta = (direc_deseada == ARRIBA) ? ABAJO : (direc_deseada == ABAJO) ? ARRIBA : (direc_deseada == IZQUIERDA) ? DERECHA : IZQUIERDA; //buen copilot
-	//cout << "me quiero mover a: " << direc_deseada << endl;
-	//cout << "estoy en " << posActual.first << " " << posActual.second << endl;
+	
+	assert(direc_deseada < 5);
+	cout << "estoy en " << posActual.first << " " << posActual.second << endl;
 
 
 	direccion planB = apuntar_a(make_pair(posActual.first, pos_bandera_contraria.second), pos_bandera_contraria);
@@ -61,6 +63,7 @@ direccion Equipo::direccion_proxima_posicion(coordenadas posActual, direccion di
 		//cout << "me puedo mover a: " << direc_nueva << endl;
 		return direc_nueva;
 	}
+	
 	if(belcebu->sePuedeMover(posActual, opuesta)) {
 		//cout<< "esto no me conviene" << endl;
 		//cout << "me puedo mover a: " << opuesta << endl;
@@ -134,6 +137,9 @@ void Equipo::jugador(int nro_jugador) {
 					pos_actual = posiciones[nro_jugador];
 					//cout << jugadores_movidos_esta_ronda << " "<< cant_jugadores << " " <<nro_jugador<< endl;
 					direccion direc_deseada = apuntar_a(pos_actual, pos_bandera_contraria);
+					cout << "direccion deseada: " << direc_deseada << endl;
+					cout << "mis constantes son: " << ARRIBA << " " << ABAJO << " " << IZQUIERDA << " " << DERECHA << endl;
+					//assert( direc_deseada < 5);
 					direccion direc_nueva = direccion_proxima_posicion(pos_actual, direc_deseada);
 					cout << "direccion nueva: " << direc_nueva << " jugador " << nro_jugador << " en " << pos_actual.first << " " << pos_actual.second << endl;
 					if (belcebu->sePuedeMover(pos_actual, direc_nueva)){
@@ -411,9 +417,9 @@ coordenadas Equipo::buscar_bandera_contraria() {
 	// ...
 	//
 	if( equipo == ROJO) {
-		pos_bandera_contraria = make_pair(15,5);
+		pos_bandera_contraria = make_pair(19,5);
 	} else {//seteo valores por simplicidad, no me hinchen
-		pos_bandera_contraria = make_pair(13,13);
+		pos_bandera_contraria = make_pair(1,13);
 	}
 
 	/**/ 

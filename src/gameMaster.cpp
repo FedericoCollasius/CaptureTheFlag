@@ -140,8 +140,8 @@ int gameMaster::mover_jugador(direccion dir, int nro_jugador) {
     // Setear la variable ganador
 	/**/
 	//cout << "dibujame como a vos te gusta" << endl;
-	//dibujame();
-	//sleep(0.1);
+	dibujame();
+	sleep(0.5);
 	coordenadas bandera_contraria = (turno == ROJO ? pos_bandera_azul : pos_bandera_roja);
 	if (posicion_nueva == bandera_contraria) {
 		cout << "gane amigo" << endl;	
