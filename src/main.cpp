@@ -11,7 +11,7 @@
 using namespace std;
 
 const estrategia strat = SECUENCIAL;
-const int quantum = 5;
+const int quantum = 10;
 
 int main(){
     Config config = *(new Config());
@@ -32,7 +32,7 @@ int main(){
 	azul.terminar();	
     //belcebu.play();
 
-    cout << "Bandera capturada por el equipo "<< belcebu.ganador << ". Felicidades!" << endl;
+    cout << "Bandera capturada por el equipo "<< belcebu.ganador << ". Felicidades!" << "\n";
 
 }
 

@@ -13,39 +13,33 @@ using namespace std;
 class gameMaster {
 private:
     // Atributos Privados
-    
     int x, y, jugadores_por_equipos;
     vector<vector<color>> tablero;
     vector<coordenadas> pos_jugadores_azules, pos_jugadores_rojos;
     coordenadas pos_bandera_roja, pos_bandera_azul;
     
-    
-	
-    /**/
     uint jugadores_movidos = 0;
+
+    // Variables de sincronizacion
     mutex permiso_para_jugar;
-    /**/
 
     // Métodos privados
     color obtener_coordenadas(coordenadas coord);
     void mover_jugador_tablero(coordenadas pos_anterior, coordenadas pos_nueva, color colorEquipo);
-    //
-    //...
-    void dibujame();
-    //
  
 public:
     // Atributos públicos
     gameMaster(Config config);
-    void termino_ronda(color equipo); // Marca que un jugador terminó la ronda
+    void termino_ronda(color equipo); 
     int mover_jugador(direccion dir, int nro_jugador);
     color ganador = INDEFINIDO;
-    //
-    //...
-    //
-    int nro_ronda = 0; //peron estatizo este dato
-    estrategia strat; //ESTO TAMBIEN
+
+    // Estas dos estaban privadas, ver si esta bien ponerlas aca
+    /**/ 
+    int nro_ronda = 0; 
+    estrategia strat;
     color turno;
+    /**/
 
     // Métodos públicos
     bool termino_juego();
@@ -56,13 +50,14 @@ public:
     color en_posicion(coordenadas coord);
     bool es_posicion_valida(coordenadas pos);
     bool es_color_libre(color color_tablero);
-	coordenadas proxima_posicion(coordenadas anterior, direccion movimiento); // Calcula la proxima posición a moverse	
-    //
-    //...
-    //
-    bool banderaRoja(coordenadas cord);
-    bool banderaAzul(coordenadas cord);
-    bool sePuedeMover(coordenadas pos_nueva, direccion direc_nueva);
+    coordenadas proxima_posicion(coordenadas anterior, direccion movimiento); // Calcula la proxima posición a moverse 
+
+
+    void dibujame();
+    void aumentar_jugadores_movidos();	
+    bool bandera_roja(coordenadas cord);
+    bool bandera_azul(coordenadas cord);
+    bool se_puede_mover(coordenadas pos_nueva, direccion direc_nueva);
 };
 
 #endif // GAMEMASTER_H

@@ -20,43 +20,40 @@ class Equipo {
 		int cant_jugadores, quantum, quantum_restante;
 		vector<thread> jugadores;
 
-		int contador_pasos = 5;
-		int movio_ultimo = -1;
-		int cant_jugadores_que_ya_jugaron = 0;
-		/**/
 		vector<coordenadas> posiciones; 
 		coordenadas pos_bandera_contraria; 
-		// sem_t bandera_contraria_encontrada;
-		// Quizas jugadores_movidos_esta_ronda tenga que ser atomica por el caso secuencial. 
-		int jugadores_movidos_esta_ronda{0};
-		int nro_jugador_mas_cercano, nro_jugador_mas_lejano;
-		/**/
+
+		// Variables de sincronizacion
+		mutex tablero; 
+		mutex bandera_contraria_encontrada;
 		
-		vector<sem_t> orden_jugadores_rr;
+		// Caso SECUENCIAL
 		vector<bool> se_movio_jugador;
+		int jugadores_movidos_esta_ronda;
+		
+		// Caso RR
+		vector<sem_t> orden_jugadores_rr;
+		
+		// Caso SHORTEST
+		int nro_jugador_mas_cercano;
+
+		// Caso USTEDES
+		int contador_pasos;
+		int movio_ultimo;
 
 		// Métodos privados 
 		direccion apuntar_a(coordenadas pos2, coordenadas pos1);
 		void jugador(int nro_jugador);
-		coordenadas buscar_bandera_contraria();
-		direccion direccion_proxima_posicion(coordenadas posActual, direccion direc_deseada);
-		mutex tablero; 
-		mutex bandera_contraria_encontrada;
+		void buscar_bandera_contraria(int nro_jugador);
 
+		direccion direccion_proxiam_posicion(coordenadas posActual, direccion direc_deseada);
 		int jugador_mas_cercano();
-		int jugador_mas_lejano();
-		//
-		// ...
-		//
+		
 	public:
 		Equipo(gameMaster *belcebu, color equipo, 
 				estrategia strat, int cant_jugadores, int quantum, vector<coordenadas> posiciones);
 		void comenzar();
 		void terminar();
-		// crear jugadores
-
 };
-
-
 
 #endif // EQUIPO_H
