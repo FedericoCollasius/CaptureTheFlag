@@ -27,8 +27,8 @@ direccion Equipo::direccion_proxima_posicion(coordenadas posActual, direccion di
 
 	direccion planB = apuntar_a(make_pair(posActual.first, pos_bandera_contraria.second), pos_bandera_contraria);
 	//cout << "planB: " << planB << endl;
-	int ranmbom = rand() % 2;
-	if(ranmbom){
+	int random = rand() % 2;
+	if(random){
 		if(belcebu->sePuedeMover(posActual, planB)) {
 			//cout << "me puedo mover a: " << planB << endl;
 			return planB;
@@ -90,7 +90,7 @@ void Equipo::jugador(int nro_jugador) {
 	this->bandera_contraria_encontrada.lock();
 	this->bandera_contraria_encontrada.unlock();
 	/**/
-	coordenadas pos_actual = posiciones[nro_jugador];//INNECESARIO?
+	coordenadas pos_actual; // = posiciones[nro_jugador];//INNECESARIO?
 	quantum_restante = 0;
 	if(strat == RR) {
 		quantum_restante = quantum;
@@ -139,7 +139,7 @@ void Equipo::jugador(int nro_jugador) {
 					cout << "direccion nueva: " << direc_nueva << " jugador " << nro_jugador << " en " << pos_actual.first << " " << pos_actual.second << endl;
 					if (belcebu->sePuedeMover(pos_actual, direc_nueva)){
 						belcebu->mover_jugador(direc_nueva, nro_jugador);
-						this->se_movio_jugador[nro_jugador] = true;
+						//this->se_movio_jugador[nro_jugador] = true;
 						this->posiciones[nro_jugador] = belcebu->proxima_posicion(pos_actual, direc_nueva);
 					}else{
 						cout << "AYUDAAAAA, NO ME PUEDO MOVERRREERE" << endl;
@@ -164,8 +164,7 @@ void Equipo::jugador(int nro_jugador) {
 					//sleep(1);
 					//cout<<"ya no me toca" << endl;
 					this->tablero.unlock();
-					break;;
-					cout << "ESTO ES TERRIBLE, AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << endl;
+					break;
 				}
 			
 			case(RR): // Espera a que le toque nro = movidos. 

@@ -10,8 +10,8 @@
 
 using namespace std;
 
-const estrategia strat = SHORTEST;
-const int quantum = 50;
+const estrategia strat = SECUENCIAL;
+const int quantum = 5;
 
 int main(){
     Config config = *(new Config());

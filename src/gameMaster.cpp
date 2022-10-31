@@ -131,7 +131,7 @@ int gameMaster::mover_jugador(direccion dir, int nro_jugador) {
 	// " soy " << nro_jugador  << " y estaba en " << posicion_vieja.first << " " << posicion_vieja.second<<endl;
 	//cout << posicion_vieja.first << " " << posicion_vieja.second << " == " << pos_actual.first << " " << pos_actual.second << endl;
 	mover_jugador_tablero(posicion_vieja, posicion_nueva, turno);
-	cout << "movi " << nro_jugador << endl;
+	//cout << "movi " << nro_jugador << endl;
 	(turno == ROJO ? pos_jugadores_rojos : pos_jugadores_azules)[nro_jugador] = posicion_nueva;
 	jugadores_movidos++;
 	// permiso_para_jugar.unlock();
@@ -141,7 +141,7 @@ int gameMaster::mover_jugador(direccion dir, int nro_jugador) {
 	/**/
 	//cout << "dibujame como a vos te gusta" << endl;
 	//dibujame();
-	//sleep(1);
+	//sleep(0.1);
 	coordenadas bandera_contraria = (turno == ROJO ? pos_bandera_azul : pos_bandera_roja);
 	if (posicion_nueva == bandera_contraria) {
 		cout << "gane amigo" << endl;	
