@@ -49,7 +49,6 @@ direccion Equipo::direccion_proxima_posicion(coordenadas posActual, direccion di
 	}
 
 
-
 	//int numero = rand() % 2 + 1;
 	//int evil_numero = (numero == 1) ? 2 : 1;
 	direc_nueva = (direccion)((direc_deseada + 1) % 4);

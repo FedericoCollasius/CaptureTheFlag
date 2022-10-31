@@ -47,10 +47,10 @@ gameMaster::gameMaster(Config config) {
 	this->y = config.y;
 	cout << "tablero de tamaño " << x << "x" << y << endl;
 
-	//assert((config.bandera_roja.first == 1)); // Bandera roja en la primera columna
+	assert((config.bandera_roja.first == 1)); // Bandera roja en la primera columna
 	assert(es_posicion_valida(config.bandera_roja)); // Bandera roja en algún lugar razonable
 
-	//assert((config.bandera_azul.first == x-1)); // Bandera azul en la primera columna
+	assert((config.bandera_azul.first == x-1)); // Bandera azul en la primera columna
 	assert(es_posicion_valida(config.bandera_azul)); // Bandera roja en algún lugar razonable
 
 	assert(config.pos_rojo.size() == config.cantidad_jugadores);
