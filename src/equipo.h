@@ -20,6 +20,8 @@ class Equipo {
 		int cant_jugadores, quantum, quantum_restante;
 		vector<thread> jugadores;
 
+		int contador_pasos = 5;
+		int movio_ultimo = -1;
 		int cant_jugadores_que_ya_jugaron = 0;
 		/**/
 		vector<coordenadas> posiciones; 
@@ -27,7 +29,7 @@ class Equipo {
 		// sem_t bandera_contraria_encontrada;
 		// Quizas jugadores_movidos_esta_ronda tenga que ser atomica por el caso secuencial. 
 		int jugadores_movidos_esta_ronda{0};
-		int nro_jugador_mas_cercano;
+		int nro_jugador_mas_cercano, nro_jugador_mas_lejano;
 		/**/
 		
 		vector<sem_t> orden_jugadores_rr;
@@ -42,6 +44,7 @@ class Equipo {
 		mutex bandera_contraria_encontrada;
 
 		int jugador_mas_cercano();
+		int jugador_mas_lejano();
 		//
 		// ...
 		//

@@ -13,13 +13,13 @@ using namespace std;
 class gameMaster {
 private:
     // Atributos Privados
-    int nro_ronda = 0;
+    
     int x, y, jugadores_por_equipos;
     vector<vector<color>> tablero;
     vector<coordenadas> pos_jugadores_azules, pos_jugadores_rojos;
     coordenadas pos_bandera_roja, pos_bandera_azul;
-    color turno;
-    estrategia strat;
+    
+    
 	
     /**/
     uint jugadores_movidos = 0;
@@ -43,6 +43,9 @@ public:
     //
     //...
     //
+    int nro_ronda = 0; //peron estatizo este dato
+    estrategia strat; //ESTO TAMBIEN
+    color turno;
 
     // Métodos públicos
     bool termino_juego();
