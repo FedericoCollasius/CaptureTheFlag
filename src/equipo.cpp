@@ -21,7 +21,15 @@ void Equipo::jugador(int nro_jugador) {
 	
 	this->bandera_contraria_encontrada.lock();
 	this->bandera_contraria_encontrada.unlock();
+	if(pos_bandera_contraria == make_pair(-1,-1)){
+		cout << "No hay bandera contraria" << "\n";
+		assert(false);
+		return;
+	}
 	
+
+
+	//cout << "la bandera contraria esta en: " << this->pos_bandera_contraria.first << " " << this->pos_bandera_contraria.second << "\n";
 	coordenadas pos_actual; 
 
 	int cant_veces_mov_ustedes = 0;
@@ -141,11 +149,14 @@ void Equipo::jugador(int nro_jugador) {
 			case(SHORTEST):
 				{ 
 					this->tablero.lock();
-					cout << "Entré. El jugador mas cercano es: " << nro_jugador_mas_cercano << "\n";
+						if(this->strat == SHORTEST || this->strat == USTEDES) {
+							this->nro_jugador_mas_cercano = jugador_mas_cercano();
+						}
+					//cout << "Entré. El jugador mas cercano es: " << nro_jugador_mas_cercano << "\n";
 
 					if(nro_jugador == nro_jugador_mas_cercano){
 						pos_actual = posiciones[nro_jugador];
-						cout << "soy el petiso" << "\n";
+						cout << "soy el petiso, el: " <<nro_jugador<< "\n";
 						direccion direc_deseada = apuntar_a(pos_actual, pos_bandera_contraria);
 						direccion direc_nueva = direccion_proxiam_posicion(pos_actual, direc_deseada);
 					
@@ -163,10 +174,10 @@ void Equipo::jugador(int nro_jugador) {
 						belcebu->termino_ronda(equipo);
 						
 					}else{
-						cout << "no soy el petiso, yo soy el " << nro_jugador << "\n";
+						//cout << "no soy el petiso, yo soy el " << nro_jugador << "\n";
 					}
 
-					cout << "Me fuí. Soy el: " << nro_jugador << "\n";
+					//cout << "Me fuí. Soy el: " << nro_jugador << "\n";
 					this->tablero.unlock();
 					break;
 				}
@@ -174,6 +185,9 @@ void Equipo::jugador(int nro_jugador) {
 			
 				{ // SHORTEST pero que el jugador mas cercano se pueda mover 1 vez mas cada turno. 
 					this->tablero.lock(); 
+					if(this->strat == SHORTEST || this->strat == USTEDES) {
+							this->nro_jugador_mas_cercano = jugador_mas_cercano();
+					}
 					if(nro_jugador == nro_jugador_mas_cercano){
 						pos_actual = posiciones[nro_jugador];
 						//cout << "soy el petiso" << "\n";
@@ -194,16 +208,12 @@ void Equipo::jugador(int nro_jugador) {
 
 						cant_veces_mov_ustedes++;
 
-						if(cant_veces_mov_ustedes == cant_mov_ustedes)
+						if(cant_veces_mov_ustedes == cant_mov_ustedes || belcebu->termino_juego()){
 							cant_veces_mov_ustedes = 0;
 							cant_mov_ustedes++;
 							belcebu->termino_ronda(equipo);
-						
-					}else{
-						//cout << "no soy el petiso, yo soy el " << nro_jugador << "\n";
-						//sleep(1);
-					}				
-
+						}			
+					}
 					this->tablero.unlock();
 
 					break;
@@ -250,16 +260,15 @@ Equipo::Equipo(gameMaster *belcebu, color equipo,
 }
 
 void Equipo::comenzar() {
-	this->bandera_contraria_encontrada.unlock();
-	this->tablero.unlock();
+	//this->bandera_contraria_encontrada.unlock();
+	//this->tablero.unlock();
+	this->bandera_contraria_encontrada.lock();
 
 	for(int i=0; i < cant_jugadores; i++) {
 		jugadores.emplace_back(thread(&Equipo::jugador, this, i)); 
 	}
 
-	if(this->strat == SHORTEST || this->strat == USTEDES) {
-		this->nro_jugador_mas_cercano = jugador_mas_cercano();
-	}
+
 }
 
 void Equipo::terminar() {
@@ -269,22 +278,23 @@ void Equipo::terminar() {
 }
 
 void Equipo::buscar_bandera_contraria(int nro_jugador) {
-	int tamaño_x = belcebu->getTamx(); 
-	int tamaño_y = belcebu->getTamy();
-	int recorrido_de_casilleros = (tamaño_x * tamaño_y) / cant_jugadores;
+	int tam_x = belcebu->getTamx(); 
+	int tam_y = belcebu->getTamy();
+	int recorrido_de_casilleros = (tam_x * tam_y) / cant_jugadores;
 	int comienzo = nro_jugador * recorrido_de_casilleros;
 	int fin = (nro_jugador + 1) * recorrido_de_casilleros; 
 	
 	for(int i = comienzo; i < fin; i++){
 		if(equipo == ROJO){
-			if (belcebu->bandera_azul(make_pair(i/tamaño_y, i%tamaño_y))){
-				pos_bandera_contraria = make_pair(i/tamaño_y, i%tamaño_y);
+			if (belcebu->bandera_azul(make_pair(i/tam_y, i%tam_y))){
+				cout << "encontre la bandera azul en " << i/tam_y << " " << i%tam_y << "\n";
+				pos_bandera_contraria = make_pair(i/tam_y, i%tam_y);
 				bandera_contraria_encontrada.unlock();
 				return;
 			}
 		} else {
-			if (belcebu->bandera_roja(make_pair(i/tamaño_y, i%tamaño_y))){
-				pos_bandera_contraria = make_pair(i/tamaño_y, i%tamaño_y);
+			if (belcebu->bandera_roja(make_pair(i/tam_y, i%tam_y))){
+				pos_bandera_contraria = make_pair(i/tam_y, i%tam_y);
 				bandera_contraria_encontrada.unlock();
 				return; 
 			}
@@ -294,16 +304,16 @@ void Equipo::buscar_bandera_contraria(int nro_jugador) {
 	// Caso en el que la division no es exacta, no se encontro el la bandera contraria
 	// y el ultimo jugador tiene que recorrer mas casilleros. 
 	if (nro_jugador == cant_jugadores -1 && pos_bandera_contraria == make_pair(-1,-1)){
-		for(int i = fin; i < tamaño_x * tamaño_y; i++){
+		for(int i = fin; i < tam_x * tam_y; i++){
 			if(equipo == ROJO){
-				if (belcebu->bandera_azul(make_pair(i/tamaño_y, i%tamaño_y))){
-					pos_bandera_contraria = make_pair(i/tamaño_y, i%tamaño_y);
+				if (belcebu->bandera_azul(make_pair(i/tam_y, i%tam_y))){
+					pos_bandera_contraria = make_pair(i/tam_y, i%tam_y);
 					bandera_contraria_encontrada.unlock();
 					return;
 				}
 			} else {
-				if (belcebu->bandera_roja(make_pair(i/tamaño_y, i%tamaño_y))){
-					pos_bandera_contraria = make_pair(i/tamaño_y, i%tamaño_y);
+				if (belcebu->bandera_roja(make_pair(i/tam_y, i%tam_y))){
+					pos_bandera_contraria = make_pair(i/tam_y, i%tam_y);
 					bandera_contraria_encontrada.unlock();
 					return; 
 				}
