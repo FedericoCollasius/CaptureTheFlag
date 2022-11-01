@@ -38,8 +38,7 @@ class Equipo {
 		int nro_jugador_mas_cercano;
 
 		// Caso USTEDES
-		int contador_pasos;
-		int movio_ultimo;
+		int cant_mov_ustedes; 
 
 		// Métodos privados 
 		direccion apuntar_a(coordenadas pos2, coordenadas pos1);

@@ -13,10 +13,12 @@ using namespace std;
 class gameMaster {
 private:
     // Atributos Privados
+    int nro_ronda = 0;
     int x, y, jugadores_por_equipos;
     vector<vector<color>> tablero;
     vector<coordenadas> pos_jugadores_azules, pos_jugadores_rojos;
     coordenadas pos_bandera_roja, pos_bandera_azul;
+    color turno;
     
     uint jugadores_movidos = 0;
 
@@ -34,11 +36,9 @@ public:
     int mover_jugador(direccion dir, int nro_jugador);
     color ganador = INDEFINIDO;
 
-    // Estas dos estaban privadas, ver si esta bien ponerlas aca
+    // Esta estaba privadas, ver si esta bien ponerlas aca
     /**/ 
-    int nro_ronda = 0; 
     estrategia strat;
-    color turno;
     /**/
 
     // Métodos públicos
@@ -58,6 +58,7 @@ public:
     bool bandera_roja(coordenadas cord);
     bool bandera_azul(coordenadas cord);
     bool se_puede_mover(coordenadas pos_nueva, direccion direc_nueva);
+    color de_quien_es_el_turno();
 };
 
 #endif // GAMEMASTER_H

@@ -13,7 +13,7 @@ direccion Equipo::apuntar_a(coordenadas pos1, coordenadas pos2) {
 	if (pos2.first > pos1.first) {
 		return DERECHA;
 	} else if (pos2.first < pos1.first) 
-		return IZQUIERDA;
+		return IZQUIERDA; 
 }
 
 void Equipo::jugador(int nro_jugador) {
@@ -23,6 +23,8 @@ void Equipo::jugador(int nro_jugador) {
 	this->bandera_contraria_encontrada.unlock();
 	
 	coordenadas pos_actual; 
+
+	int cant_veces_mov_ustedes = 0;
 	
 	while(!this->belcebu->termino_juego()) {
 		if(equipo == ROJO){
@@ -48,7 +50,7 @@ void Equipo::jugador(int nro_jugador) {
 			case(SECUENCIAL):
 				{	
 					this->tablero.lock();
-					if(se_movio_jugador[nro_jugador] || belcebu->turno != equipo || belcebu->termino_juego()){
+					if(se_movio_jugador[nro_jugador] || belcebu->de_quien_es_el_turno() != equipo || belcebu->termino_juego()){
 						////cout << "ups equipo: "<< nro_jugador << "\n";
 						tablero.unlock();
 						break;
@@ -95,7 +97,7 @@ void Equipo::jugador(int nro_jugador) {
 				{
 					//cout << "i shouldnt be here" << "\n";
 					sem_wait(&orden_jugadores_rr[nro_jugador]);
-					if(belcebu->turno != equipo){
+					if(belcebu->de_quien_es_el_turno() != equipo){
 						//cout << "no me toca" << "\n";
 						sem_post(&orden_jugadores_rr[nro_jugador]);
 						break;
@@ -139,10 +141,11 @@ void Equipo::jugador(int nro_jugador) {
 			case(SHORTEST):
 				{ 
 					this->tablero.lock();
+					cout << "Entré. El jugador mas cercano es: " << nro_jugador_mas_cercano << "\n";
 
 					if(nro_jugador == nro_jugador_mas_cercano){
 						pos_actual = posiciones[nro_jugador];
-						//cout << "soy el petiso" << "\n";
+						cout << "soy el petiso" << "\n";
 						direccion direc_deseada = apuntar_a(pos_actual, pos_bandera_contraria);
 						direccion direc_nueva = direccion_proxiam_posicion(pos_actual, direc_deseada);
 					
@@ -160,41 +163,48 @@ void Equipo::jugador(int nro_jugador) {
 						belcebu->termino_ronda(equipo);
 						
 					}else{
-						////cout << "no soy el petiso, yo soy el " << nro_jugador << "\n";
-						//sleep(1);
+						cout << "no soy el petiso, yo soy el " << nro_jugador << "\n";
 					}
+
+					cout << "Me fuí. Soy el: " << nro_jugador << "\n";
 					this->tablero.unlock();
 					break;
 				}
 			case(USTEDES):
-				{
-					tablero.lock();
-					if(movio_ultimo == nro_jugador){
-						tablero.unlock();
-						break;
+			
+				{ // SHORTEST pero que el jugador mas cercano se pueda mover 1 vez mas cada turno. 
+					this->tablero.lock(); 
+					if(nro_jugador == nro_jugador_mas_cercano){
+						pos_actual = posiciones[nro_jugador];
+						//cout << "soy el petiso" << "\n";
+						direccion direc_deseada = apuntar_a(pos_actual, pos_bandera_contraria);
+						direccion direc_nueva = direccion_proxiam_posicion(pos_actual, direc_deseada);
+					
+						if (belcebu->se_puede_mover(pos_actual, direc_nueva)){
+							belcebu->mover_jugador(direc_nueva, nro_jugador);
+							this->posiciones[nro_jugador] = belcebu->proxima_posicion(pos_actual, direc_nueva);
+						}else{
+							//cout << "ESTO ES IMPOSIBLE" << "\n";
+						}
+						int viejo = nro_jugador_mas_cercano;
+						nro_jugador_mas_cercano = jugador_mas_cercano();
+						if(viejo != nro_jugador_mas_cercano){
+							cout<< "cambio el mas cercano de " << viejo << " a " << nro_jugador_mas_cercano << "\n";
+						}
+
+						cant_veces_mov_ustedes++;
+
+						if(cant_veces_mov_ustedes == cant_mov_ustedes)
+							cant_veces_mov_ustedes = 0;
+							cant_mov_ustedes++;
+							belcebu->termino_ronda(equipo);
+						
 					}else{
-						movio_ultimo = nro_jugador;
-					}
-					if(belcebu->turno != equipo){
-						tablero.unlock();
-						break;
-					}
-					pos_actual = posiciones[nro_jugador];
-					direccion direc_deseada = apuntar_a(pos_actual, pos_bandera_contraria);
-					direccion direc_nueva = direccion_proxiam_posicion(pos_actual, direc_deseada);
-				
-					if (belcebu->se_puede_mover(pos_actual, direc_nueva)){
-						belcebu->mover_jugador(direc_nueva, nro_jugador);
-						this->posiciones[nro_jugador] = belcebu->proxima_posicion(pos_actual, direc_nueva);
-					}else{
-						//cout << "ESTO ES IMPOSIBLE" << "\n";
-					}
-					contador_pasos--;
-					if(contador_pasos == 0){
-						contador_pasos = 5;
-						belcebu->termino_ronda(equipo);
-					}
-					tablero.unlock();
+						//cout << "no soy el petiso, yo soy el " << nro_jugador << "\n";
+						//sleep(1);
+					}				
+
+					this->tablero.unlock();
 
 					break;
 				}
@@ -236,8 +246,7 @@ Equipo::Equipo(gameMaster *belcebu, color equipo,
 	this->nro_jugador_mas_cercano = -1;
 
 	// Caso USTEDES
-	contador_pasos = 5; 
-	movio_ultimo = -1;
+	cant_mov_ustedes = 1; 
 }
 
 void Equipo::comenzar() {
@@ -248,7 +257,7 @@ void Equipo::comenzar() {
 		jugadores.emplace_back(thread(&Equipo::jugador, this, i)); 
 	}
 
-	if(this->strat == SHORTEST){
+	if(this->strat == SHORTEST || this->strat == USTEDES) {
 		this->nro_jugador_mas_cercano = jugador_mas_cercano();
 	}
 }
@@ -365,7 +374,7 @@ int Equipo::jugador_mas_cercano() {
 		int distancia_jugador_bandera = belcebu->distancia(posiciones[i], this->pos_bandera_contraria);
 		if(distancia_jugador_bandera < distancia_mas_cercana) {
 			distancia_mas_cercana = distancia_jugador_bandera;
-			nro_jugador_mas_cercano = i; // Checkear que atributo de jugador es su id. 
+			nro_jugador_mas_cercano = i; // Checkear qué atributo de jugador es su id. 
 		}
 	}
 
