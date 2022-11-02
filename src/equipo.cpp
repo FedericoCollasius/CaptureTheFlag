@@ -58,7 +58,8 @@ void Equipo::jugador(int nro_jugador) {
 			case(SECUENCIAL):
 				{	
 					this->tablero.lock();
-					if(se_movio_jugador[nro_jugador] || belcebu->de_quien_es_el_turno() != equipo || belcebu->termino_juego()){
+					
+					if(se_movio_jugador[nro_jugador] || belcebu->de_quien_es_el_turno() != this->equipo|| belcebu->termino_juego()){
 						////cout << "ups equipo: "<< nro_jugador << "\n";
 						tablero.unlock();
 						break;
@@ -105,11 +106,13 @@ void Equipo::jugador(int nro_jugador) {
 				{
 					//cout << "i shouldnt be here" << "\n";
 					sem_wait(&orden_jugadores_rr[nro_jugador]);
+					
 					if(belcebu->de_quien_es_el_turno() != equipo){
 						//cout << "no me toca" << "\n";
 						sem_post(&orden_jugadores_rr[nro_jugador]);
 						break;
 					}
+					
 					if(belcebu->termino_juego()){
 						for(int i = 0; i < cant_jugadores;i++){
 							sem_post(&orden_jugadores_rr[i]);

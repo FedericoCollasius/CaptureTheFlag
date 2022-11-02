@@ -253,7 +253,9 @@ void gameMaster::aumentar_jugadores_movidos(){
 	jugadores_movidos++;
 }
 
+
 color gameMaster::de_quien_es_el_turno(){
 	return turno; 
 }
+
 
