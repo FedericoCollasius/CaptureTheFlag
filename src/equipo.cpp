@@ -26,23 +26,20 @@ void Equipo::jugador(int nro_jugador) {
 		assert(false);
 		return;
 	}
-	
-
-
 	//cout << "la bandera contraria esta en: " << this->pos_bandera_contraria.first << " " << this->pos_bandera_contraria.second << "\n";
 	coordenadas pos_actual; 
 
 	int cant_veces_mov_ustedes = 0;
 	
 	while(!this->belcebu->termino_juego()) {
-		if(equipo == ROJO){
-			sem_wait(&(belcebu->turno_rojo));
-			sem_post(&(belcebu->turno_rojo));
-		}
-		else{
-			sem_wait(&(belcebu->turno_azul));
-			sem_post(&(belcebu->turno_azul));
-		}
+		//if(equipo == ROJO){
+		//	sem_wait(&(belcebu->turno_rojo));
+		//	sem_post(&(belcebu->turno_rojo));
+		//}
+		//else{
+		//	sem_wait(&(belcebu->turno_azul));
+		//	sem_post(&(belcebu->turno_azul));
+		//}
 		if(belcebu->termino_juego()){
 			if(strat == RR){
 				////cout << "El equipo " << equipo << " libera" << "\n";
@@ -59,7 +56,17 @@ void Equipo::jugador(int nro_jugador) {
 				{	
 					this->tablero.lock();
 					
-					if(se_movio_jugador[nro_jugador] || belcebu->de_quien_es_el_turno() != this->equipo|| belcebu->termino_juego()){
+					if(equipo == ROJO){
+						sem_wait(&(belcebu->turno_rojo));
+						sem_post(&(belcebu->turno_rojo));
+					}
+					else{
+						sem_wait(&(belcebu->turno_azul));
+						sem_post(&(belcebu->turno_azul));
+					}
+
+
+					if(se_movio_jugador[nro_jugador] ||  belcebu->termino_juego()){
 						////cout << "ups equipo: "<< nro_jugador << "\n";
 						tablero.unlock();
 						break;
@@ -107,18 +114,28 @@ void Equipo::jugador(int nro_jugador) {
 					//cout << "i shouldnt be here" << "\n";
 					sem_wait(&orden_jugadores_rr[nro_jugador]);
 					
-					if(belcebu->de_quien_es_el_turno() != equipo){
-						//cout << "no me toca" << "\n";
-						sem_post(&orden_jugadores_rr[nro_jugador]);
-						break;
+
+					if(equipo == ROJO){
+						sem_wait(&(belcebu->turno_rojo));
+						sem_post(&(belcebu->turno_rojo));
 					}
+					else{
+						sem_wait(&(belcebu->turno_azul));
+						sem_post(&(belcebu->turno_azul));
+					}
+
+					//if(belcebu->de_quien_es_el_turno() != equipo){
+					//	//cout << "no me toca" << "\n";
+					//	sem_post(&orden_jugadores_rr[nro_jugador]);
+					//	break;
+					//}
 					
 					if(belcebu->termino_juego()){
 						for(int i = 0; i < cant_jugadores;i++){
 							sem_post(&orden_jugadores_rr[i]);
 						}
 						break;
-						}
+					}
 					if (this->quantum_restante > 0){
 						pos_actual = posiciones[nro_jugador];
 						direccion direc_deseada = apuntar_a(pos_actual, pos_bandera_contraria);
@@ -151,6 +168,16 @@ void Equipo::jugador(int nro_jugador) {
 				
 			case(SHORTEST):
 				{ 
+
+					if(equipo == ROJO){
+						sem_wait(&(belcebu->turno_rojo));
+						sem_post(&(belcebu->turno_rojo));
+					}
+					else{
+						sem_wait(&(belcebu->turno_azul));
+						sem_post(&(belcebu->turno_azul));
+					}
+
 					this->tablero.lock();
 						if(this->strat == SHORTEST || this->strat == USTEDES) {
 							this->nro_jugador_mas_cercano = jugador_mas_cercano();
@@ -186,11 +213,21 @@ void Equipo::jugador(int nro_jugador) {
 				}
 			case(USTEDES):
 			
-				{ // SHORTEST pero que el jugador mas cercano se pueda mover 1 vez mas cada turno. 
-					this->tablero.lock(); 
-					if(this->strat == SHORTEST || this->strat == USTEDES) {
-							this->nro_jugador_mas_cercano = jugador_mas_cercano();
+				{ // SHORTEST pero que el jugador mas cercano se pueda mover 1 vez mas cada turno.
+
+					if(equipo == ROJO){
+						sem_wait(&(belcebu->turno_rojo));
+						sem_post(&(belcebu->turno_rojo));
 					}
+					else{
+						sem_wait(&(belcebu->turno_azul));
+						sem_post(&(belcebu->turno_azul));
+					}
+
+					this->tablero.lock(); 
+					
+					this->nro_jugador_mas_cercano = jugador_mas_cercano();
+					
 					if(nro_jugador == nro_jugador_mas_cercano){
 						pos_actual = posiciones[nro_jugador];
 						//cout << "soy el petiso" << "\n";
@@ -227,7 +264,7 @@ void Equipo::jugador(int nro_jugador) {
 }
 
 Equipo::Equipo(gameMaster *belcebu, color equipo, 
-		estrategia strat, int cant_jugadores, int quantum, vector<coordenadas> posiciones) {
+	estrategia strat, int cant_jugadores, int quantum, vector<coordenadas> posiciones) {
 	this->belcebu = belcebu;
 	this->equipo = equipo;
 	this->contrario = (equipo == ROJO)? AZUL: ROJO;
@@ -242,6 +279,8 @@ Equipo::Equipo(gameMaster *belcebu, color equipo,
 	this->cant_jugadores = cant_jugadores;
 	this->posiciones = posiciones;
 	pos_bandera_contraria = make_pair(-1,-1);
+
+	this->belcebu->strat = strat;
 
 	// Caso SECUENCIAL
 	jugadores_movidos_esta_ronda = 0; 
