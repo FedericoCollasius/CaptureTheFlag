@@ -10,7 +10,7 @@
 using namespace std;
 class Config{
     public:
-        Config();
+        Config(string nombre_archivo);
         vector<coordenadas> pos_rojo, pos_azul;
         coordenadas bandera_roja, bandera_azul;
         int cantidad_jugadores;

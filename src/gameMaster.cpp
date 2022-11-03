@@ -77,24 +77,25 @@ gameMaster::gameMaster(Config config) {
         fill(tablero[i].begin(), tablero[i].end(), VACIO);
     }
     
+	tablero[config.bandera_roja.first][config.bandera_roja.second] = BANDERA_ROJA;
+    tablero[config.bandera_azul.first][config.bandera_azul.second] = BANDERA_AZUL;
 
     for(auto &coord : config.pos_rojo){
-		cout << "Posicion roja: " << coord.first << " " << coord.second << "\n";
+		//cout << "Posicion roja: " << coord.first << " " << coord.second << "\n";
         assert(es_color_libre(tablero[coord.first][coord.second])); //Compruebo que no haya otro jugador en esa posicion
         tablero[coord.first][coord.second] = ROJO; // guardo la posicion
     }
 
     for(auto &coord : config.pos_azul){
-		cout << "Posicion azul: " << coord.first << " " << coord.second << "\n";
+		//cout << "Posicion azul: " << coord.first << " " << coord.second << "\n";
         assert(es_color_libre(tablero[coord.first][coord.second]));
         tablero[coord.first][coord.second] = AZUL;
     }
 
-    tablero[config.bandera_roja.first][config.bandera_roja.second] = BANDERA_ROJA;
-    tablero[config.bandera_azul.first][config.bandera_azul.second] = BANDERA_AZUL;
+
 	this->turno = ROJO;
-	dibujame();
-    cout << "SE HA INICIALIZADO GAMEMASTER CON EXITO" << "\n";
+	//dibujame();
+    //cout << "SE HA INICIALIZADO GAMEMASTER CON EXITO" << "\n";
     
 	// Acomodar semaforos turno rojo turno azul.
 	sem_init(&turno_azul, 0, 0);
@@ -131,7 +132,7 @@ int gameMaster::mover_jugador(direccion dir, int nro_jugador) {
     // Setear la variable ganador
 	// cout << "dibujame como a vos te gusta" << "\n";
 	//dibujame();
-	//sleep(1);
+	//sleep(0.2);
 	coordenadas bandera_contraria = (turno == ROJO ? pos_bandera_azul : pos_bandera_roja);
 	if (posicion_nueva == bandera_contraria) {
 		// cout << "gane amigo" << "\n";	
@@ -171,7 +172,7 @@ void gameMaster::termino_ronda(color equipo) {
 	// Cambiar el turno
 	nro_ronda++;
 	jugadores_movidos=0;
-	if(nro_ronda > 10000) { ganador = EMPATE; }
+	if(nro_ronda > 10000 && ganador == INDEFINIDO) { ganador = EMPATE; }
 	turno = (color)(ROJO+AZUL-turno);
 	if(termino_juego()){
 		sem_post(&(turno_rojo));

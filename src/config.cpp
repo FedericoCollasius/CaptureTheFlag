@@ -1,8 +1,8 @@
 #include "config.h"
 
 
-Config::Config() {
-    ifstream config("./config/config_parameters.csv");
+Config::Config(string nombre_archivo) {
+    ifstream config("./config/"+nombre_archivo);
     if(!config){
         cerr << "Error: el archivo no pudo ser abierto" << endl;
         exit(1);

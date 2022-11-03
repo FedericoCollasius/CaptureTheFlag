@@ -20,7 +20,7 @@ private:
     coordenadas pos_bandera_roja, pos_bandera_azul;
     color turno;
     
-    uint jugadores_movidos = 0;
+   
 
     // Variables de sincronizacion
     mutex permiso_para_jugar;
@@ -39,9 +39,11 @@ public:
     // Esta estaba privadas, ver si esta bien ponerlas aca
     /**/ 
     estrategia strat;
+    uint jugadores_movidos = 0;
     /**/
     
     // Métodos públicos
+    
     bool termino_juego();
 	int getTamx();
 	int getTamy();

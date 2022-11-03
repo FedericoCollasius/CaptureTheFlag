@@ -10,29 +10,35 @@
 
 using namespace std;
 
-const estrategia strat = SECUENCIAL;
-const int quantum = 10;
+const estrategia strat = USTEDES;
+const int quantum = 6;
 
 int main(){
-    Config config = *(new Config());
 
-	
-    gameMaster belcebu = gameMaster(config);
- 
-    belcebu.strat = strat;
-	// Creo equipos (lanza procesos)
+    vector<string> vectorsito;
+    for (int i = 0; i < 10000; i++)
+    {
+        cout << "corriendo test " << i << endl;
 
-	Equipo rojo(&belcebu, ROJO, strat, config.cantidad_jugadores, quantum, config.pos_rojo);
-	Equipo azul(&belcebu, AZUL, strat, config.cantidad_jugadores, quantum, config.pos_azul);
+        Config config (to_string(i) + ".csv");
+
     
+        gameMaster belcebu = gameMaster(config);
     
-    rojo.comenzar();
-    azul.comenzar();
-	rojo.terminar();
-	azul.terminar();	
-    //belcebu.play();
+        belcebu.strat = strat;//culpa peron
+	    // Creo equipos (lanza procesos)
 
-    cout << "Bandera capturada por el equipo "<< belcebu.ganador << ". Felicidades!" << "\n";
+	    Equipo rojo(&belcebu, ROJO, strat, config.cantidad_jugadores, quantum, config.pos_rojo);
+	    Equipo azul(&belcebu, AZUL, strat, config.cantidad_jugadores, quantum, config.pos_azul);
 
+
+        rojo.comenzar();
+        azul.comenzar();
+	    rojo.terminar();
+	    azul.terminar();	
+        //belcebu.play();
+
+        cout << "Bandera capturada por el equipo "<< belcebu.ganador << ". Felicidades!" << "\n";
+    }
 }
 
