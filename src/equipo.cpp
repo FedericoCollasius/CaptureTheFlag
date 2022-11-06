@@ -5,6 +5,7 @@
 #include <assert.h> 
 
 
+
 direccion Equipo::apuntar_a(coordenadas pos1, coordenadas pos2) {
 	//cout << "pos1: " << pos1.first << " " << pos1.second << "\n";
 	//cout << "pos2: " << pos2.first << " " << pos2.second << "\n";
@@ -17,10 +18,16 @@ direccion Equipo::apuntar_a(coordenadas pos1, coordenadas pos2) {
 }
 
 void Equipo::jugador(int nro_jugador) {
+
+
 	buscar_bandera_contraria(nro_jugador);
-	
+
 	this->bandera_contraria_encontrada.lock();
+
 	this->bandera_contraria_encontrada.unlock();
+
+	return;
+
 	if(pos_bandera_contraria == make_pair(-1,-1)){
 		cout << "No hay bandera contraria" << "\n";
 		assert(false);
@@ -335,7 +342,7 @@ void Equipo::buscar_bandera_contraria(int nro_jugador) {
 	for(int i = comienzo; i < fin; i++){
 		if(equipo == ROJO){
 			if (belcebu->bandera_azul(make_pair(i/tam_y, i%tam_y))){
-				cout << "encontre la bandera azul en " << i/tam_y << " " << i%tam_y << "\n";
+				//cout << "encontre la bandera azul en " << i/tam_y << " " << i%tam_y << "\n";
 				pos_bandera_contraria = make_pair(i/tam_y, i%tam_y);
 				bandera_contraria_encontrada.unlock();
 				return;
@@ -368,7 +375,6 @@ void Equipo::buscar_bandera_contraria(int nro_jugador) {
 			}
 		}	
 	}
-
 }
 
 direccion Equipo::direccion_proxiam_posicion(coordenadas posActual, direccion direc_deseada) {
