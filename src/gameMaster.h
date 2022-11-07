@@ -19,9 +19,8 @@ private:
     vector<coordenadas> pos_jugadores_azules, pos_jugadores_rojos;
     coordenadas pos_bandera_roja, pos_bandera_azul;
     color turno;
+    estrategia strat;
     
-   
-
     // Variables de sincronizacion
     mutex permiso_para_jugar;
 
@@ -36,14 +35,9 @@ public:
     int mover_jugador(direccion dir, int nro_jugador);
     color ganador = INDEFINIDO;
 
-    // Esta estaba privadas, ver si esta bien ponerlas aca
-    /**/ 
-    estrategia strat;
     uint jugadores_movidos = 0;
-    /**/
     
     // Métodos públicos
-    
     bool termino_juego();
 	int getTamx();
 	int getTamy();
@@ -60,7 +54,7 @@ public:
     bool bandera_roja(coordenadas cord);
     bool bandera_azul(coordenadas cord);
     bool se_puede_mover(coordenadas pos_nueva, direccion direc_nueva);
-    color de_quien_es_el_turno();
+    void setear_strat(estrategia strat);
 };
 
 #endif // GAMEMASTER_H
