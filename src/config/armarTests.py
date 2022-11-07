@@ -41,12 +41,11 @@ def armarTest(nombreTest, valorX, valorY, cantJugadores):
 def crearTests(n):
     numero = 0
     for i in range(n):
-        for j in range(1,10):
-            #tamTablero = random.randint(5, 100)
-            tamTablero = 20000
-            cum = int(tamTablero/2)
-            #armarTest(str(i) + ".csv", tamTablero, tamTablero, random.randint(1, min(cum,13))  )
-            armarTest(str(numero) + ".csv", tamTablero, tamTablero, j)
-            numero += 1
+        tamTablero = random.randint(5, 100)
+        #tamTablero = 20000
+        cota = int(tamTablero/2)
+        armarTest(str(i) + ".csv", tamTablero, tamTablero, random.randint(1, min(cota,13))  )
+        #//armarTest(str(numero) + ".csv", tamTablero, tamTablero, j)
+        numero += 1
 
-crearTests(1)
+crearTests(1000)

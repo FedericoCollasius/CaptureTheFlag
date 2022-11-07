@@ -222,7 +222,7 @@ void gameMaster::aumentar_jugadores_movidos(){
 	jugadores_movidos++;
 }
 
-void setear_strat(estrategia strat){
+void gameMaster::setear_strat(estrategia strat){
 	this->strat = strat;
 }
 

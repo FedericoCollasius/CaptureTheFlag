@@ -264,8 +264,6 @@ void Equipo::comenzar() {
 	for(int i=0; i < cant_jugadores; i++) {
 		jugadores.emplace_back(thread(&Equipo::jugador, this, i)); 
 	}
-
-
 }
 
 void Equipo::terminar() {
